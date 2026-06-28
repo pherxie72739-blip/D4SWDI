@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>District 4 SWDI Gap Dashboard</title>
+<style>
+:root{
+  --navy:#0d2b4e;
+  --navy-deep:#081b33;
+  --gold:#f0a500;
+  --gold-soft:#ffd166;
+  --cream:#faf6ee;
+  --paper:#ffffff;
+  --ink:#1b2430;
+  --muted:#5c6b7a;
+  --l0:#3fa66a;
+  --l1:#e2483c;
+  --l2:#ff9a47;
+  --l3:#a9d6bb;
+  --nr:#c9d2da;
+  --line:rgba(13,43,78,0.12);
+  --radius:14px;
+  font-family:'Spline Sans','Segoe UI',system-ui,sans-serif;
+}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Spline+Sans:wght@400;500;600;700&family=Space+Mono:wght@500;700&display=swap');
+*{box-sizing:border-box;}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:'Spline Sans',sans-serif;}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px 80px;}
+
+/* HERO */
+.hero{
+  background:radial-gradient(120% 140% at 10% 0%, var(--navy) 0%, var(--navy-deep) 65%);
+  color:#fff;
+  padding:46px 28px 60px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:"";
+  position:absolute; right:-120px; top:-120px; width:420px; height:420px;
+  background:radial-gradient(circle, rgba(240,165,0,0.35), transparent 70%);
+}
+.hero-inner{max-width:1280px;margin:0 auto;position:relative;z-index:2;}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--gold-soft);
+  border:1px solid rgba(255,255,255,0.25); border-radius:999px;
+  padding:6px 14px; margin-bottom:18px;
+}
+.hero h1{font-size:clamp(32px,4.4vw,52px); font-weight:700; line-height:1.05; max-width:820px;}
+.hero h1 em{font-style:italic; color:var(--gold-soft); font-weight:600;}
+.hero p.sub{font-size:16px; color:rgba(255,255,255,.78); max-width:620px; margin-top:14px; line-height:1.55;}
+
+.kpis{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+  margin-top:38px;
+}
+.kpi{
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  backdrop-filter:blur(6px);
+}
+.kpi .num{font-family:'Fraunces',serif; font-size:34px; font-weight:700; color:#fff;}
+.kpi .num span{color:var(--gold-soft);}
+.kpi .lbl{font-size:12.5px; color:rgba(255,255,255,.65); margin-top:4px; text-transform:uppercase; letter-spacing:.05em;}
+
+/* SECTION HEADERS */
+.section{margin-top:54px;}
+.section-head{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:18px; flex-wrap:wrap;}
+.section-head h2{font-size:26px; color:var(--navy);}
+.section-head .desc{color:var(--muted); font-size:14px; max-width:480px; margin-top:6px;}
+.tag{
+  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--navy); background:var(--gold-soft); padding:4px 10px; border-radius:999px;
+  display:inline-block; margin-bottom:10px;
+}
+
+.card{
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+  padding:24px; box-shadow:0 1px 0 rgba(13,43,78,0.04);
+}
+
+/* INDICATOR BARS */
+.indicator-row{display:flex; flex-direction:column; gap:6px; padding:10px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+.indicator-row:last-child{border-bottom:none;}
+.indicator-row .ind-main{display:flex; align-items:center; gap:14px;}
+.indicator-row .iname{width:230px; flex-shrink:0; font-size:13px; font-weight:600; color:var(--ink);}
+.indicator-row .ibar-track{flex:1; height:22px; background:#eef1f0; border-radius:6px; overflow:hidden; display:flex;}
+.indicator-row .seg{height:100%; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; color:rgba(0,0,0,.55); overflow:hidden;}
+.indicator-row .ival{width:54px; text-align:right; font-family:'Space Mono',monospace; font-size:13px; color:var(--navy); font-weight:700; flex-shrink:0;}
+.indicator-row.active .iname{color:var(--gold); }
+.indicator-row.active{background:rgba(240,165,0,0.06); border-radius:8px;}
+.ind-figures{display:flex; gap:14px; flex-wrap:wrap; padding-left:284px; font-size:11.5px; color:var(--muted);}
+.ind-figures .fig-chip{display:inline-flex; align-items:center; gap:5px; font-family:'Space Mono',monospace;}
+.ind-figures .fig-chip i{width:8px; height:8px; border-radius:2px; display:inline-block;}
+.ind-figures .fig-chip b{color:var(--ink); font-weight:700;}
+@media (max-width:760px){ .ind-figures{padding-left:0;} }
+.legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:16px; font-size:12px; color:var(--muted);}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend i{width:11px; height:11px; border-radius:3px; display:inline-block;}
+
+/* TWO COL */
+.twocol{display:grid; grid-template-columns:1.3fr 1fr; gap:20px;}
+@media (max-width:920px){.twocol{grid-template-columns:1fr;}}
+
+/* BARANGAY RANKING */
+.brgy-list{max-height:560px; overflow-y:auto; padding-right:6px;}
+.brgy-row{display:flex; flex-direction:column; gap:4px; padding:8px 0; border-bottom:1px dashed var(--line);}
+.brgy-main{display:flex; align-items:center; gap:10px;}
+.brgy-rank{font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); width:22px;}
+.brgy-name{flex:1; font-size:13px; font-weight:600;}
+.brgy-bar-track{flex:1.4; height:10px; background:#eef1f0; border-radius:5px; overflow:hidden;}
+.brgy-bar{height:100%; background:linear-gradient(90deg, var(--gold), var(--l1)); border-radius:5px;}
+.brgy-val{font-family:'Space Mono',monospace; font-size:12px; width:54px; text-align:right; color:var(--navy); font-weight:700;}
+.brgy-figures{display:flex; gap:14px; padding-left:32px;}
+
+/* SEARCH */
+.search-box{display:flex; gap:10px; margin-bottom:14px;}
+.search-box input{
+  flex:1; padding:10px 14px; border-radius:10px; border:1px solid var(--line);
+  font-family:'Spline Sans',sans-serif; font-size:13px; background:#fff;
+}
+.search-box input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+
+/* HEATMAP */
+.heatmap-wrap{overflow-x:auto; border-radius:var(--radius);}
+table.heatmap{border-collapse:collapse; font-size:11px; min-width:1400px;}
+table.heatmap th{
+  position:sticky; top:0; background:var(--paper); z-index:3;
+  font-family:'Space Mono',monospace; font-weight:500; font-size:9.5px; color:var(--muted);
+  text-transform:uppercase; padding:6px 4px; writing-mode:vertical-rl; text-orientation:mixed;
+  height:140px; vertical-align:bottom; border-bottom:2px solid var(--navy);
+}
+table.heatmap th.rowhead{writing-mode:horizontal-tb; text-align:left; position:sticky; left:0; background:var(--paper); z-index:4; min-width:130px;}
+table.heatmap td{
+  width:30px; height:26px; text-align:center; font-family:'Space Mono',monospace; font-size:10px;
+  border:1px solid #fff; color:rgba(0,0,0,.55); cursor:default;
+}
+table.heatmap td.rowname{
+  position:sticky; left:0; background:var(--paper); text-align:left; font-weight:600; color:var(--ink);
+  font-family:'Spline Sans',sans-serif; padding-left:8px; min-width:130px;
+}
+table.heatmap tr:hover td{outline:1px solid var(--navy); outline-offset:-1px;}
+
+/* FOOTER NOTE */
+.howto{
+  background:var(--navy); color:#fff; border-radius:var(--radius); padding:28px 30px; margin-top:60px;
+}
+.howto h3{color:var(--gold-soft); font-size:20px; margin-bottom:12px;}
+.howto ol{margin:0; padding-left:20px; font-size:13.5px; line-height:1.8; color:rgba(255,255,255,.85);}
+.howto a{color:var(--gold-soft);}
+.footnote{font-size:12px; color:var(--muted); margin-top:10px;}
+
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+.chip{
+  font-family:'Space Mono',monospace; font-size:11px; padding:6px 12px; border-radius:999px;
+  border:1px solid var(--line); background:#fff; cursor:pointer; color:var(--muted);
+}
+.chip.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+/* HERO ILLUSTRATION */
+.hero-art{
+  position:absolute; right:0; bottom:0; width:46%; max-width:560px; opacity:0.95;
+  pointer-events:none;
+}
+@media (max-width:920px){ .hero-art{display:none;} }
+.hero-inner{display:flex; justify-content:space-between; align-items:flex-end; gap:30px;}
+.hero-text{flex:1; min-width:280px;}
+
+/* CATEGORY ICONS */
+.icat{
+  width:30px; height:30px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center;
+}
+.icat svg{width:17px; height:17px;}
+.indicator-row .iname-wrap{display:flex; align-items:center; gap:10px; width:230px; flex-shrink:0;}
+.indicator-row .iname{width:auto;}
+.chip{display:inline-flex; align-items:center; gap:6px;}
+.chip svg{width:13px; height:13px;}
+
+/* PROFILE STRIP */
+.profile-strip{
+  display:flex; gap:18px; overflow-x:auto; margin:30px 0 8px; padding-bottom:6px;
+}
+.profile-card{
+  flex:0 0 168px; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 14px; text-align:center;
+}
+.profile-card .picon{width:46px; height:46px; margin:0 auto 10px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+.profile-card .picon svg{width:24px; height:24px;}
+.profile-card h4{font-size:12.5px; font-weight:700; color:var(--navy); margin:0 0 4px; text-transform:uppercase; letter-spacing:.03em;}
+.profile-card .pval{font-family:'Fraunces',serif; font-weight:700; font-size:20px; color:var(--ink);}
+.profile-card .psub{font-size:10.5px; color:var(--muted); margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+    <span class="eyebrow">&#9670; DSWD 4Ps &middot; District 4 &middot; SWDI Assessment 2025</span>
+    <h1>Where the <em>gaps</em> live, barangay by barangay.</h1>
+    <p class="sub">A working map of Social Welfare &amp; Development Indicator (SWDI) results across 165 barangays and 23 indicators &mdash; built to point fieldwork and case management where they matter most.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="num">1,595</div><div class="lbl">Households Assessed</div></div>
+      <div class="kpi"><div class="num">165</div><div class="lbl">Barangays Covered</div></div>
+      <div class="kpi"><div class="num">23</div><div class="lbl">SWDI Indicators Tracked</div></div>
+      <div class="kpi"><div class="num"><span>33.0%</span></div><div class="lbl">Avg. Below Self-Sufficiency</div></div>
+    </div>
+    </div>
+    <svg class="hero-art" viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="210" cy="155" r="150" fill="rgba(255,255,255,0.04)"/>
+      <circle cx="210" cy="155" r="110" fill="rgba(255,255,255,0.05)"/>
+      <g>
+        <rect x="40" y="170" width="60" height="90" rx="4" fill="#13355c"/>
+        <polygon points="40,170 70,140 100,170" fill="#f0a500"/>
+        <rect x="58" y="195" width="14" height="18" fill="#ffd166"/>
+        <rect x="108" y="140" width="70" height="120" rx="4" fill="#0f2d52"/>
+        <polygon points="108,140 143,105 178,140" fill="#e2483c"/>
+        <rect x="125" y="170" width="14" height="18" fill="#ffd166"/>
+        <rect x="150" y="170" width="14" height="18" fill="#ffd166"/>
+        <rect x="186" y="120" width="80" height="140" rx="4" fill="#13355c"/>
+        <polygon points="186,120 226,80 266,120" fill="#f0a500"/>
+        <rect x="205" y="150" width="16" height="20" fill="#ffd166"/>
+        <rect x="232" y="150" width="16" height="20" fill="#ffd166"/>
+        <rect x="205" y="185" width="16" height="20" fill="rgba(255,209,102,0.55)"/>
+        <rect x="274" y="165" width="58" height="95" rx="4" fill="#0f2d52"/>
+        <polygon points="274,165 303,138 332,165" fill="#e2483c"/>
+        <rect x="290" y="190" width="14" height="18" fill="#ffd166"/>
+        <rect x="340" y="185" width="50" height="75" rx="4" fill="#13355c"/>
+        <polygon points="340,185 365,160 390,185" fill="#f0a500"/>
+        <rect x="355" y="208" width="12" height="16" fill="#ffd166"/>
+      </g>
+      <line x1="20" y1="260" x2="400" y2="260" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+      <g fill="#ffd166">
+        <circle cx="225" cy="248" r="5"/><rect x="220" y="253" width="10" height="16" rx="3"/>
+        <circle cx="245" cy="250" r="4"/><rect x="241" y="254" width="8" height="13" rx="3"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="profile-strip" id="profileStrip"></div>
+
+  <div class="section">
+    <span class="tag">01 &middot; Indicator Gaps</span>
+    <div class="section-head">
+      <div>
+        <h2>Which indicators are failing households most?</h2>
+        <div class="desc">Ranked by share of Level 1 (Survival) + Level 2 (Subsistence) &mdash; households not yet Self-Sufficient. Click any row to filter the barangay heatmap below.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="indicatorList"></div>
+      <div class="legend">
+        <span><i style="background:var(--l0)"></i> No Gap</span>
+        <span><i style="background:var(--l1)"></i> Level 1 &middot; Survival</span>
+        <span><i style="background:var(--l2)"></i> Level 2 &middot; Subsistence</span>
+        <span><i style="background:var(--l3)"></i> Level 3 &middot; Self-Sufficient</span>
+        <span><i style="background:var(--nr)"></i> No Result</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="tag">01b &middot; Survival vs Subsistence</span>
+    <div class="section-head">
+      <div>
+        <h2>Level 1 &amp; Level 2 households, indicator by indicator</h2>
+        <div class="desc">Raw household counts at Survival (red) and Subsistence (orange) for each indicator, sorted by total households still below self-sufficiency.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="overflow-x:auto;">
+        <svg id="l1l2Chart" style="display:block;min-width:760px;width:100%;height:560px;"></svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--l1)"></i> Level 1 &middot; Survival</span>
+        <span><i style="background:var(--l2)"></i> Level 2 &middot; Subsistence</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="tag">02 &middot; Barangay Priority</span>
+    <div class="section-head">
+      <div>
+        <h2>Top barangays by households below self-sufficiency</h2>
+        <div class="desc">Total Level 1 (Survival) + Level 2 (Subsistence) flags summed across all 22 indicators &mdash; excludes the composite SWDI score.</div>
+      </div>
+    </div>
+    <div class="twocol">
+      <div class="card">
+        <div class="search-box">
+          <input id="brgySearch" type="text" placeholder="Search a barangay (e.g. BARANGAY 432)&#8230;">
+        </div>
+        <div class="brgy-list" id="brgyList"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px;color:var(--navy);margin-bottom:10px;">Reading the numbers</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;">
+          <b style="color:var(--ink)">High-severity count</b> is a raw total &mdash; bigger barangays naturally
+          rack up more flags. <b style="color:var(--ink)">Rate per household</b> below normalizes for that,
+          showing average gap flags per assessed household &mdash; useful for spotting small barangays in deep distress.
+        </p>
+        <div id="topRateList" style="margin-top:14px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="tag">03 &middot; Cross-Tab</span>
+    <div class="section-head">
+      <div>
+        <h2>Barangay &times; Indicator severity heatmap</h2>
+        <div class="desc">Top 30 priority barangays. Darker red = more households at Level 1 (Survival) or Level 2 (Subsistence) on that indicator. Use the chips to isolate a theme.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar" id="themeChips"></div>
+      <div class="heatmap-wrap"><table class="heatmap" id="heatmapTable"></table></div>
+    </div>
+  </div>
+
+  <div class="howto">
+    <h3>&#8594; Turning this into a live Looker Studio report</h3>
+    <ol>
+      <li>In your Sheet, add a <b>new tab named "Tidy Data"</b> with columns: <code>Indicator, Barangay, Level, Count</code> &mdash; ask me and I can write this tab directly via Google Drive.</li>
+      <li>Open <a href="https://lookerstudio.google.com" target="_blank">Looker Studio</a> &rarr; <b>Create &rarr; Report</b> &rarr; connector <b>Google Sheets</b> &rarr; select this spreadsheet &rarr; the Tidy Data tab.</li>
+      <li>Build a <b>Pivot table / Heatmap chart</b>: rows = Barangay, columns = Indicator, metric = SUM(Count), filter Level = "Level 1" or "Level 2" for the below-self-sufficiency view (Level 3 = Self-Sufficient is the good outcome).</li>
+      <li>Add a <b>scorecard</b> for total households, a <b>bar chart</b> ranked by Indicator (like Section 01 above), and a <b>geo or table chart</b> ranked by Barangay (like Section 02).</li>
+      <li>Add a <b>dropdown filter control</b> on "Indicator" and "Level" so viewers can click through exactly like this dashboard.</li>
+    </ol>
+    <div class="footnote">Want me to actually create that Tidy Data tab in your spreadsheet right now and double check the Looker Studio field types? Just say so.</div>
+  </div>
+
+</div>
+
+<script>
+const DATA = {"indicators": [{"indicator": "SWDI Result 2025", "Level 1": 1.0, "Level 2": 1063.0, "Level 3": 0.0, "No Gap": 0.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 1064.0, "GapRate": 66.7}, {"indicator": "PARTICIPATION", "Level 1": 757.0, "Level 2": 249.0, "Level 3": 57.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 1006.0, "GapRate": 63.1}, {"indicator": "GENDER-BASED VIOLENCE", "Level 1": 57.0, "Level 2": 825.0, "Level 3": 181.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 882.0, "GapRate": 55.3}, {"indicator": "EMPLOYABLE SKILLS", "Level 1": 287.0, "Level 2": 576.0, "Level 3": 198.0, "No Gap": 3.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 863.0, "GapRate": 54.1}, {"indicator": "GARBAGE DISPOSAL", "Level 1": 18.0, "Level 2": 840.0, "Level 3": 205.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 858.0, "GapRate": 53.8}, {"indicator": "RIGHTS OF THE CHILDREN", "Level 1": 44.0, "Level 2": 813.0, "Level 3": 206.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 857.0, "GapRate": 53.7}, {"indicator": "SOCIAL SECURITY", "Level 1": 370.0, "Level 2": 483.0, "Level 3": 209.0, "No Gap": 2.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 853.0, "GapRate": 53.5}, {"indicator": "EMPLOYMENT", "Level 1": 371.0, "Level 2": 479.0, "Level 3": 211.0, "No Gap": 3.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 850.0, "GapRate": 53.3}, {"indicator": "INVOLVEMENT", "Level 1": 232.0, "Level 2": 616.0, "Level 3": 215.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 848.0, "GapRate": 53.2}, {"indicator": "DISASTER RISK REDUCTION MANAGEM", "Level 1": 54.0, "Level 2": 781.0, "Level 3": 228.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 835.0, "GapRate": 52.4}, {"indicator": "ABILITY OF PARENTSGUARDIANS", "Level 1": 1.0, "Level 2": 640.0, "Level 3": 422.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 641.0, "GapRate": 40.2}, {"indicator": "INCOME", "Level 1": 305.0, "Level 2": 334.0, "Level 3": 423.0, "No Gap": 2.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 639.0, "GapRate": 40.1}, {"indicator": "ACCESSIBLE HEALTH SERVICES", "Level 1": 1.0, "Level 2": 563.0, "Level 3": 498.0, "No Gap": 2.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 564.0, "GapRate": 35.4}, {"indicator": "WALLS", "Level 1": 44.0, "Level 2": 506.0, "Level 3": 513.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 550.0, "GapRate": 34.5}, {"indicator": "HEALTH CONDITION", "Level 1": 27.0, "Level 2": 483.0, "Level 3": 552.0, "No Gap": 2.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 510.0, "GapRate": 32.0}, {"indicator": "ROOF", "Level 1": 48.0, "Level 2": 399.0, "Level 3": 616.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 447.0, "GapRate": 28.0}, {"indicator": "TENURE", "Level 1": 38.0, "Level 2": 236.0, "Level 3": 789.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 274.0, "GapRate": 17.2}, {"indicator": "ENROLLMENTATTENDANCE", "Level 1": 29.0, "Level 2": 171.0, "Level 3": 857.0, "No Gap": 7.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 200.0, "GapRate": 12.5}, {"indicator": "DRINKING WATER", "Level 1": 1.0, "Level 2": 109.0, "Level 3": 953.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 110.0, "GapRate": 6.9}, {"indicator": "TOILET FACILITIES", "Level 1": 10.0, "Level 2": 86.0, "Level 3": 967.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 96.0, "GapRate": 6.0}, {"indicator": "LIGHTING", "Level 1": 7.0, "Level 2": 80.0, "Level 3": 976.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 87.0, "GapRate": 5.5}, {"indicator": "NUMBER OF MEALS", "Level 1": 2.0, "Level 2": 71.0, "Level 3": 990.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 73.0, "GapRate": 4.6}, {"indicator": "FUNCTIONAL LITERACY", "Level 1": 0.0, "Level 2": 30.0, "Level 3": 1033.0, "No Gap": 1.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 30.0, "GapRate": 1.9}, {"indicator": "NUTRITIONAL STATUS", "Level 1": 7.0, "Level 2": 5.0, "Level 3": 89.0, "No Gap": 963.0, "No Result": 531.0, "Total": 1595.0, "HighSeverity": 12.0, "GapRate": 0.8}], "barangays": [{"barangay": "BARANGAY 432", "level1": 332.0, "level2": 574.0, "assessed": 93.0, "high": 906.0, "rate_per_hh": 9.74}, {"barangay": "BARANGAY 561", "level1": 100.0, "level2": 360.0, "assessed": 52.0, "high": 460.0, "rate_per_hh": 8.85}, {"barangay": "BARANGAY 464", "level1": 22.0, "level2": 390.0, "assessed": 32.0, "high": 412.0, "rate_per_hh": 12.88}, {"barangay": "BARANGAY 458", "level1": 41.0, "level2": 358.0, "assessed": 42.0, "high": 399.0, "rate_per_hh": 9.5}, {"barangay": "BARANGAY 484", "level1": 99.0, "level2": 287.0, "assessed": 40.0, "high": 386.0, "rate_per_hh": 9.65}, {"barangay": "BARANGAY 420", "level1": 94.0, "level2": 287.0, "assessed": 47.0, "high": 381.0, "rate_per_hh": 8.11}, {"barangay": "BARANGAY 553", "level1": 85.0, "level2": 245.0, "assessed": 37.0, "high": 330.0, "rate_per_hh": 8.92}, {"barangay": "BARANGAY 566", "level1": 63.0, "level2": 260.0, "assessed": 33.0, "high": 323.0, "rate_per_hh": 9.79}, {"barangay": "BARANGAY 429", "level1": 106.0, "level2": 179.0, "assessed": 29.0, "high": 285.0, "rate_per_hh": 9.83}, {"barangay": "BARANGAY 401", "level1": 70.0, "level2": 201.0, "assessed": 39.0, "high": 271.0, "rate_per_hh": 6.95}, {"barangay": "BARANGAY 569", "level1": 49.0, "level2": 213.0, "assessed": 30.0, "high": 262.0, "rate_per_hh": 8.73}, {"barangay": "BARANGAY 562", "level1": 47.0, "level2": 209.0, "assessed": 33.0, "high": 256.0, "rate_per_hh": 7.76}, {"barangay": "BARANGAY 568", "level1": 23.0, "level2": 206.0, "assessed": 23.0, "high": 229.0, "rate_per_hh": 9.96}, {"barangay": "BARANGAY 584", "level1": 32.0, "level2": 168.0, "assessed": 24.0, "high": 200.0, "rate_per_hh": 8.33}, {"barangay": "BARANGAY 418", "level1": 31.0, "level2": 157.0, "assessed": 32.0, "high": 188.0, "rate_per_hh": 5.88}, {"barangay": "BARANGAY 450", "level1": 33.0, "level2": 151.0, "assessed": 26.0, "high": 184.0, "rate_per_hh": 7.08}, {"barangay": "BARANGAY 581", "level1": 23.0, "level2": 152.0, "assessed": 28.0, "high": 175.0, "rate_per_hh": 6.25}, {"barangay": "BARANGAY 527", "level1": 23.0, "level2": 145.0, "assessed": 24.0, "high": 168.0, "rate_per_hh": 7.0}, {"barangay": "BARANGAY 473", "level1": 23.0, "level2": 145.0, "assessed": 19.0, "high": 168.0, "rate_per_hh": 8.84}, {"barangay": "BARANGAY 456", "level1": 10.0, "level2": 153.0, "assessed": 20.0, "high": 163.0, "rate_per_hh": 8.15}, {"barangay": "BARANGAY 564", "level1": 35.0, "level2": 127.0, "assessed": 18.0, "high": 162.0, "rate_per_hh": 9.0}, {"barangay": "BARANGAY 499", "level1": 19.0, "level2": 133.0, "assessed": 21.0, "high": 152.0, "rate_per_hh": 7.24}, {"barangay": "BARANGAY 545", "level1": 23.0, "level2": 128.0, "assessed": 16.0, "high": 151.0, "rate_per_hh": 9.44}, {"barangay": "BARANGAY 525", "level1": 85.0, "level2": 60.0, "assessed": 16.0, "high": 145.0, "rate_per_hh": 9.06}, {"barangay": "BARANGAY 448", "level1": 22.0, "level2": 120.0, "assessed": 14.0, "high": 142.0, "rate_per_hh": 10.14}, {"barangay": "BARANGAY 422", "level1": 29.0, "level2": 110.0, "assessed": 27.0, "high": 139.0, "rate_per_hh": 5.15}, {"barangay": "BARANGAY 571", "level1": 11.0, "level2": 117.0, "assessed": 18.0, "high": 128.0, "rate_per_hh": 7.11}, {"barangay": "BARANGAY 439", "level1": 21.0, "level2": 102.0, "assessed": 18.0, "high": 123.0, "rate_per_hh": 6.83}, {"barangay": "BARANGAY 576", "level1": 23.0, "level2": 99.0, "assessed": 20.0, "high": 122.0, "rate_per_hh": 6.1}, {"barangay": "BARANGAY 567", "level1": 31.0, "level2": 90.0, "assessed": 14.0, "high": 121.0, "rate_per_hh": 8.64}, {"barangay": "BARANGAY 402", "level1": 34.0, "level2": 87.0, "assessed": 22.0, "high": 121.0, "rate_per_hh": 5.5}, {"barangay": "BARANGAY 579", "level1": 24.0, "level2": 96.0, "assessed": 18.0, "high": 120.0, "rate_per_hh": 6.67}, {"barangay": "BARANGAY 586", "level1": 9.0, "level2": 111.0, "assessed": 13.0, "high": 120.0, "rate_per_hh": 9.23}, {"barangay": "BARANGAY 483", "level1": 23.0, "level2": 95.0, "assessed": 19.0, "high": 118.0, "rate_per_hh": 6.21}, {"barangay": "BARANGAY 559", "level1": 30.0, "level2": 87.0, "assessed": 11.0, "high": 117.0, "rate_per_hh": 10.64}, {"barangay": "BARANGAY 535", "level1": 16.0, "level2": 98.0, "assessed": 12.0, "high": 114.0, "rate_per_hh": 9.5}, {"barangay": "BARANGAY 410", "level1": 29.0, "level2": 79.0, "assessed": 19.0, "high": 108.0, "rate_per_hh": 5.68}, {"barangay": "BARANGAY 494", "level1": 41.0, "level2": 61.0, "assessed": 12.0, "high": 102.0, "rate_per_hh": 8.5}, {"barangay": "BARANGAY 540", "level1": 20.0, "level2": 82.0, "assessed": 11.0, "high": 102.0, "rate_per_hh": 9.27}, {"barangay": "BARANGAY 452", "level1": 19.0, "level2": 76.0, "assessed": 9.0, "high": 95.0, "rate_per_hh": 10.56}, {"barangay": "BARANGAY 515", "level1": 16.0, "level2": 78.0, "assessed": 12.0, "high": 94.0, "rate_per_hh": 7.83}, {"barangay": "BARANGAY 565", "level1": 19.0, "level2": 74.0, "assessed": 12.0, "high": 93.0, "rate_per_hh": 7.75}, {"barangay": "BARANGAY 509", "level1": 24.0, "level2": 67.0, "assessed": 7.0, "high": 91.0, "rate_per_hh": 13.0}, {"barangay": "BARANGAY 546", "level1": 25.0, "level2": 65.0, "assessed": 9.0, "high": 90.0, "rate_per_hh": 10.0}, {"barangay": "BARANGAY 436", "level1": 13.0, "level2": 71.0, "assessed": 9.0, "high": 84.0, "rate_per_hh": 9.33}, {"barangay": "BARANGAY 537", "level1": 13.0, "level2": 70.0, "assessed": 11.0, "high": 83.0, "rate_per_hh": 7.55}, {"barangay": "BARANGAY 582", "level1": 10.0, "level2": 72.0, "assessed": 12.0, "high": 82.0, "rate_per_hh": 6.83}, {"barangay": "BARANGAY 485", "level1": 13.0, "level2": 69.0, "assessed": 18.0, "high": 82.0, "rate_per_hh": 4.56}, {"barangay": "BARANGAY 475", "level1": 8.0, "level2": 73.0, "assessed": 8.0, "high": 81.0, "rate_per_hh": 10.12}, {"barangay": "BARANGAY 580", "level1": 16.0, "level2": 63.0, "assessed": 13.0, "high": 79.0, "rate_per_hh": 6.08}, {"barangay": "BARANGAY 513", "level1": 21.0, "level2": 57.0, "assessed": 11.0, "high": 78.0, "rate_per_hh": 7.09}, {"barangay": "BARANGAY 572", "level1": 9.0, "level2": 67.0, "assessed": 11.0, "high": 76.0, "rate_per_hh": 6.91}, {"barangay": "BARANGAY 421", "level1": 16.0, "level2": 57.0, "assessed": 9.0, "high": 73.0, "rate_per_hh": 8.11}, {"barangay": "BARANGAY 493", "level1": 41.0, "level2": 29.0, "assessed": 9.0, "high": 70.0, "rate_per_hh": 7.78}, {"barangay": "BARANGAY 512", "level1": 16.0, "level2": 52.0, "assessed": 10.0, "high": 68.0, "rate_per_hh": 6.8}, {"barangay": "BARANGAY 451", "level1": 18.0, "level2": 46.0, "assessed": 7.0, "high": 64.0, "rate_per_hh": 9.14}, {"barangay": "BARANGAY 511", "level1": 22.0, "level2": 41.0, "assessed": 5.0, "high": 63.0, "rate_per_hh": 12.6}, {"barangay": "BARANGAY 409", "level1": 13.0, "level2": 49.0, "assessed": 11.0, "high": 62.0, "rate_per_hh": 5.64}, {"barangay": "BARANGAY 434", "level1": 17.0, "level2": 42.0, "assessed": 9.0, "high": 59.0, "rate_per_hh": 6.56}, {"barangay": "BARANGAY 500", "level1": 11.0, "level2": 48.0, "assessed": 8.0, "high": 59.0, "rate_per_hh": 7.38}, {"barangay": "BARANGAY 554", "level1": 13.0, "level2": 39.0, "assessed": 6.0, "high": 52.0, "rate_per_hh": 8.67}, {"barangay": "BARANGAY 570", "level1": 7.0, "level2": 44.0, "assessed": 10.0, "high": 51.0, "rate_per_hh": 5.1}, {"barangay": "BARANGAY 453", "level1": 14.0, "level2": 33.0, "assessed": 10.0, "high": 47.0, "rate_per_hh": 4.7}, {"barangay": "BARANGAY 563", "level1": 9.0, "level2": 38.0, "assessed": 5.0, "high": 47.0, "rate_per_hh": 9.4}, {"barangay": "BARANGAY 472", "level1": 1.0, "level2": 44.0, "assessed": 10.0, "high": 45.0, "rate_per_hh": 4.5}, {"barangay": "BARANGAY 423", "level1": 13.0, "level2": 30.0, "assessed": 4.0, "high": 43.0, "rate_per_hh": 10.75}, {"barangay": "BARANGAY 547", "level1": 11.0, "level2": 32.0, "assessed": 5.0, "high": 43.0, "rate_per_hh": 8.6}, {"barangay": "BARANGAY 577", "level1": 16.0, "level2": 26.0, "assessed": 5.0, "high": 42.0, "rate_per_hh": 8.4}, {"barangay": "BARANGAY 552", "level1": 12.0, "level2": 30.0, "assessed": 5.0, "high": 42.0, "rate_per_hh": 8.4}, {"barangay": "BARANGAY 454", "level1": 5.0, "level2": 36.0, "assessed": 4.0, "high": 41.0, "rate_per_hh": 10.25}, {"barangay": "BARANGAY 487", "level1": 13.0, "level2": 28.0, "assessed": 5.0, "high": 41.0, "rate_per_hh": 8.2}, {"barangay": "BARANGAY 455", "level1": 19.0, "level2": 21.0, "assessed": 13.0, "high": 40.0, "rate_per_hh": 3.08}, {"barangay": "BARANGAY 417", "level1": 4.0, "level2": 36.0, "assessed": 11.0, "high": 40.0, "rate_per_hh": 3.64}, {"barangay": "BARANGAY 446", "level1": 8.0, "level2": 30.0, "assessed": 6.0, "high": 38.0, "rate_per_hh": 6.33}, {"barangay": "BARANGAY 474", "level1": 0.0, "level2": 38.0, "assessed": 3.0, "high": 38.0, "rate_per_hh": 12.67}, {"barangay": "BARANGAY 498", "level1": 24.0, "level2": 14.0, "assessed": 3.0, "high": 38.0, "rate_per_hh": 12.67}, {"barangay": "BARANGAY 550", "level1": 4.0, "level2": 33.0, "assessed": 7.0, "high": 37.0, "rate_per_hh": 5.29}, {"barangay": "BARANGAY 413", "level1": 9.0, "level2": 27.0, "assessed": 8.0, "high": 36.0, "rate_per_hh": 4.5}, {"barangay": "BARANGAY 443", "level1": 21.0, "level2": 15.0, "assessed": 5.0, "high": 36.0, "rate_per_hh": 7.2}, {"barangay": "BARANGAY 514", "level1": 8.0, "level2": 27.0, "assessed": 5.0, "high": 35.0, "rate_per_hh": 7.0}, {"barangay": "BARANGAY 431", "level1": 11.0, "level2": 24.0, "assessed": 4.0, "high": 35.0, "rate_per_hh": 8.75}, {"barangay": "BARANGAY 583", "level1": 2.0, "level2": 32.0, "assessed": 5.0, "high": 34.0, "rate_per_hh": 6.8}, {"barangay": "BARANGAY 507", "level1": 13.0, "level2": 20.0, "assessed": 4.0, "high": 33.0, "rate_per_hh": 8.25}, {"barangay": "BARANGAY 539", "level1": 7.0, "level2": 22.0, "assessed": 4.0, "high": 29.0, "rate_per_hh": 7.25}, {"barangay": "BARANGAY 496", "level1": 17.0, "level2": 11.0, "assessed": 2.0, "high": 28.0, "rate_per_hh": 14.0}, {"barangay": "BARANGAY 398", "level1": 12.0, "level2": 16.0, "assessed": 5.0, "high": 28.0, "rate_per_hh": 5.6}, {"barangay": "BARANGAY 438", "level1": 13.0, "level2": 15.0, "assessed": 3.0, "high": 28.0, "rate_per_hh": 9.33}, {"barangay": "BARANGAY 508", "level1": 8.0, "level2": 18.0, "assessed": 4.0, "high": 26.0, "rate_per_hh": 6.5}, {"barangay": "BARANGAY 399", "level1": 10.0, "level2": 16.0, "assessed": 6.0, "high": 26.0, "rate_per_hh": 4.33}, {"barangay": "BARANGAY 558", "level1": 6.0, "level2": 20.0, "assessed": 4.0, "high": 26.0, "rate_per_hh": 6.5}, {"barangay": "BARANGAY 442", "level1": 4.0, "level2": 21.0, "assessed": 2.0, "high": 25.0, "rate_per_hh": 12.5}, {"barangay": "BARANGAY 504", "level1": 11.0, "level2": 14.0, "assessed": 3.0, "high": 25.0, "rate_per_hh": 8.33}, {"barangay": "BARANGAY 532", "level1": 3.0, "level2": 21.0, "assessed": 3.0, "high": 24.0, "rate_per_hh": 8.0}, {"barangay": "BARANGAY 531", "level1": 4.0, "level2": 20.0, "assessed": 6.0, "high": 24.0, "rate_per_hh": 4.0}, {"barangay": "BARANGAY 528", "level1": 4.0, "level2": 20.0, "assessed": 2.0, "high": 24.0, "rate_per_hh": 12.0}, {"barangay": "BARANGAY 495", "level1": 9.0, "level2": 15.0, "assessed": 4.0, "high": 24.0, "rate_per_hh": 6.0}, {"barangay": "BARANGAY 412", "level1": 4.0, "level2": 19.0, "assessed": 9.0, "high": 23.0, "rate_per_hh": 2.56}, {"barangay": "BARANGAY 482", "level1": 5.0, "level2": 18.0, "assessed": 8.0, "high": 23.0, "rate_per_hh": 2.88}, {"barangay": "BARANGAY 536", "level1": 5.0, "level2": 18.0, "assessed": 2.0, "high": 23.0, "rate_per_hh": 11.5}, {"barangay": "BARANGAY 575", "level1": 11.0, "level2": 12.0, "assessed": 3.0, "high": 23.0, "rate_per_hh": 7.67}, {"barangay": "BARANGAY 549", "level1": 6.0, "level2": 17.0, "assessed": 4.0, "high": 23.0, "rate_per_hh": 5.75}, {"barangay": "BARANGAY 534", "level1": 1.0, "level2": 20.0, "assessed": 3.0, "high": 21.0, "rate_per_hh": 7.0}, {"barangay": "BARANGAY 557", "level1": 2.0, "level2": 19.0, "assessed": 6.0, "high": 21.0, "rate_per_hh": 3.5}, {"barangay": "BARANGAY 573", "level1": 6.0, "level2": 14.0, "assessed": 3.0, "high": 20.0, "rate_per_hh": 6.67}, {"barangay": "BARANGAY 541", "level1": 3.0, "level2": 17.0, "assessed": 2.0, "high": 20.0, "rate_per_hh": 10.0}, {"barangay": "BARANGAY 578", "level1": 5.0, "level2": 14.0, "assessed": 3.0, "high": 19.0, "rate_per_hh": 6.33}, {"barangay": "BARANGAY 435", "level1": 0.0, "level2": 19.0, "assessed": 1.0, "high": 19.0, "rate_per_hh": 19.0}, {"barangay": "BARANGAY 574", "level1": 9.0, "level2": 10.0, "assessed": 5.0, "high": 19.0, "rate_per_hh": 3.8}, {"barangay": "BARANGAY 462", "level1": 0.0, "level2": 18.0, "assessed": 1.0, "high": 18.0, "rate_per_hh": 18.0}, {"barangay": "BARANGAY 428", "level1": 1.0, "level2": 14.0, "assessed": 4.0, "high": 15.0, "rate_per_hh": 3.75}, {"barangay": "BARANGAY 457", "level1": 0.0, "level2": 15.0, "assessed": 1.0, "high": 15.0, "rate_per_hh": 15.0}, {"barangay": "BARANGAY 411", "level1": 3.0, "level2": 12.0, "assessed": 5.0, "high": 15.0, "rate_per_hh": 3.0}, {"barangay": "BARANGAY 437", "level1": 10.0, "level2": 5.0, "assessed": 5.0, "high": 15.0, "rate_per_hh": 3.0}, {"barangay": "BARANGAY 523", "level1": 10.0, "level2": 4.0, "assessed": 5.0, "high": 14.0, "rate_per_hh": 2.8}, {"barangay": "BARANGAY 407", "level1": 2.0, "level2": 12.0, "assessed": 1.0, "high": 14.0, "rate_per_hh": 14.0}, {"barangay": "BARANGAY 440", "level1": 11.0, "level2": 3.0, "assessed": 4.0, "high": 14.0, "rate_per_hh": 3.5}, {"barangay": "BARANGAY 491", "level1": 8.0, "level2": 5.0, "assessed": 2.0, "high": 13.0, "rate_per_hh": 6.5}, {"barangay": "BARANGAY 502", "level1": 5.0, "level2": 8.0, "assessed": 1.0, "high": 13.0, "rate_per_hh": 13.0}, {"barangay": "BARANGAY 408", "level1": 1.0, "level2": 11.0, "assessed": 2.0, "high": 12.0, "rate_per_hh": 6.0}, {"barangay": "BARANGAY 424", "level1": 3.0, "level2": 9.0, "assessed": 2.0, "high": 12.0, "rate_per_hh": 6.0}, {"barangay": "BARANGAY 430", "level1": 7.0, "level2": 5.0, "assessed": 2.0, "high": 12.0, "rate_per_hh": 6.0}, {"barangay": "BARANGAY 538", "level1": 4.0, "level2": 8.0, "assessed": 2.0, "high": 12.0, "rate_per_hh": 6.0}, {"barangay": "BARANGAY 518", "level1": 1.0, "level2": 11.0, "assessed": 2.0, "high": 12.0, "rate_per_hh": 6.0}, {"barangay": "BARANGAY 505", "level1": 1.0, "level2": 10.0, "assessed": 4.0, "high": 11.0, "rate_per_hh": 2.75}, {"barangay": "BARANGAY 501", "level1": 1.0, "level2": 10.0, "assessed": 6.0, "high": 11.0, "rate_per_hh": 1.83}, {"barangay": "BARANGAY 555", "level1": 3.0, "level2": 8.0, "assessed": 3.0, "high": 11.0, "rate_per_hh": 3.67}, {"barangay": "BARANGAY 416", "level1": 4.0, "level2": 7.0, "assessed": 6.0, "high": 11.0, "rate_per_hh": 1.83}, {"barangay": "BARANGAY 476", "level1": 3.0, "level2": 8.0, "assessed": 3.0, "high": 11.0, "rate_per_hh": 3.67}, {"barangay": "BARANGAY 516", "level1": 1.0, "level2": 10.0, "assessed": 1.0, "high": 11.0, "rate_per_hh": 11.0}, {"barangay": "BARANGAY 510", "level1": 2.0, "level2": 9.0, "assessed": 1.0, "high": 11.0, "rate_per_hh": 11.0}, {"barangay": "BARANGAY 459", "level1": 3.0, "level2": 7.0, "assessed": 2.0, "high": 10.0, "rate_per_hh": 5.0}, {"barangay": "BARANGAY 519", "level1": 2.0, "level2": 8.0, "assessed": 2.0, "high": 10.0, "rate_per_hh": 5.0}, {"barangay": "BARANGAY 543", "level1": 1.0, "level2": 9.0, "assessed": 2.0, "high": 10.0, "rate_per_hh": 5.0}, {"barangay": "BARANGAY 426", "level1": 2.0, "level2": 7.0, "assessed": 4.0, "high": 9.0, "rate_per_hh": 2.25}, {"barangay": "BARANGAY 415", "level1": 2.0, "level2": 7.0, "assessed": 1.0, "high": 9.0, "rate_per_hh": 9.0}, {"barangay": "BARANGAY 403", "level1": 1.0, "level2": 8.0, "assessed": 2.0, "high": 9.0, "rate_per_hh": 4.5}, {"barangay": "BARANGAY 522", "level1": 2.0, "level2": 6.0, "assessed": 1.0, "high": 8.0, "rate_per_hh": 8.0}, {"barangay": "BARANGAY 414", "level1": 6.0, "level2": 2.0, "assessed": 5.0, "high": 8.0, "rate_per_hh": 1.6}, {"barangay": "BARANGAY 441", "level1": 6.0, "level2": 1.0, "assessed": 1.0, "high": 7.0, "rate_per_hh": 7.0}, {"barangay": "BARANGAY 551", "level1": 5.0, "level2": 2.0, "assessed": 2.0, "high": 7.0, "rate_per_hh": 3.5}, {"barangay": "BARANGAY 445", "level1": 5.0, "level2": 2.0, "assessed": 1.0, "high": 7.0, "rate_per_hh": 7.0}, {"barangay": "BARANGAY 419", "level1": 1.0, "level2": 3.0, "assessed": 8.0, "high": 4.0, "rate_per_hh": 0.5}, {"barangay": "BARANGAY 427", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 395", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 400", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 425", "level1": 0.0, "level2": 0.0, "assessed": 3.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 461", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 444", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 449", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 503", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 506", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 481", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 492", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 486", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 479", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 468", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 477", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 447", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 548", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 530", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 542", "level1": 0.0, "level2": 0.0, "assessed": 3.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 526", "level1": 0.0, "level2": 0.0, "assessed": 2.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 529", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 533", "level1": 0.0, "level2": 0.0, "assessed": 2.0, "high": 0.0, "rate_per_hh": 0.0}, {"barangay": "BARANGAY 521", "level1": 0.0, "level2": 0.0, "assessed": 1.0, "high": 0.0, "rate_per_hh": 0.0}], "matrix": {"barangays": ["BARANGAY 432", "BARANGAY 561", "BARANGAY 464", "BARANGAY 458", "BARANGAY 484", "BARANGAY 420", "BARANGAY 553", "BARANGAY 566", "BARANGAY 429", "BARANGAY 401", "BARANGAY 569", "BARANGAY 562", "BARANGAY 568", "BARANGAY 584", "BARANGAY 418", "BARANGAY 450", "BARANGAY 581", "BARANGAY 527", "BARANGAY 473", "BARANGAY 456", "BARANGAY 564", "BARANGAY 499", "BARANGAY 545", "BARANGAY 525", "BARANGAY 448", "BARANGAY 422", "BARANGAY 571", "BARANGAY 439", "BARANGAY 576", "BARANGAY 567"], "indicators": ["ABILITY OF PARENTSGUARDIANS", "ACCESSIBLE HEALTH SERVICES", "DISASTER RISK REDUCTION MANAGEM", "DRINKING WATER", "EMPLOYABLE SKILLS", "EMPLOYMENT", "ENROLLMENTATTENDANCE", "FUNCTIONAL LITERACY", "GARBAGE DISPOSAL", "GENDER-BASED VIOLENCE", "HEALTH CONDITION", "INCOME", "INVOLVEMENT", "LIGHTING", "NUMBER OF MEALS", "NUTRITIONAL STATUS", "PARTICIPATION", "RIGHTS OF THE CHILDREN", "ROOF", "SOCIAL SECURITY", "TENURE", "TOILET FACILITIES", "WALLS"], "values": [[32.0, 31.0, 52.0, 17.0, 68.0, 68.0, 23.0, 5.0, 49.0, 67.0, 25.0, 55.0, 52.0, 4.0, 8.0, 1.0, 72.0, 62.0, 51.0, 64.0, 34.0, 14.0, 52.0], [30.0, 13.0, 38.0, 0.0, 29.0, 29.0, 4.0, 3.0, 39.0, 38.0, 30.0, 31.0, 33.0, 0.0, 4.0, 0.0, 39.0, 38.0, 13.0, 30.0, 7.0, 1.0, 11.0], [19.0, 24.0, 22.0, 18.0, 24.0, 23.0, 19.0, 3.0, 24.0, 24.0, 17.0, 5.0, 21.0, 17.0, 6.0, 0.0, 22.0, 23.0, 19.0, 22.0, 21.0, 19.0, 20.0], [25.0, 23.0, 26.0, 14.0, 26.0, 24.0, 17.0, 2.0, 24.0, 26.0, 12.0, 11.0, 13.0, 11.0, 6.0, 1.0, 20.0, 26.0, 11.0, 26.0, 23.0, 9.0, 23.0], [17.0, 35.0, 20.0, 2.0, 33.0, 31.0, 3.0, 2.0, 34.0, 26.0, 25.0, 16.0, 22.0, 0.0, 2.0, 0.0, 35.0, 21.0, 10.0, 18.0, 2.0, 2.0, 30.0], [19.0, 20.0, 29.0, 0.0, 25.0, 24.0, 2.0, 0.0, 23.0, 30.0, 20.0, 21.0, 31.0, 0.0, 3.0, 2.0, 31.0, 29.0, 20.0, 23.0, 10.0, 1.0, 18.0], [16.0, 4.0, 20.0, 2.0, 25.0, 26.0, 5.0, 0.0, 27.0, 23.0, 23.0, 16.0, 23.0, 2.0, 3.0, 0.0, 26.0, 23.0, 20.0, 24.0, 3.0, 0.0, 19.0], [22.0, 0.0, 25.0, 0.0, 28.0, 26.0, 2.0, 0.0, 28.0, 25.0, 23.0, 15.0, 23.0, 0.0, 1.0, 2.0, 27.0, 25.0, 18.0, 14.0, 5.0, 0.0, 14.0], [26.0, 27.0, 3.0, 1.0, 22.0, 21.0, 5.0, 0.0, 25.0, 4.0, 0.0, 16.0, 25.0, 0.0, 1.0, 0.0, 25.0, 4.0, 25.0, 27.0, 2.0, 1.0, 25.0], [17.0, 13.0, 23.0, 0.0, 20.0, 20.0, 7.0, 0.0, 5.0, 24.0, 2.0, 26.0, 13.0, 3.0, 1.0, 0.0, 26.0, 23.0, 9.0, 25.0, 4.0, 0.0, 10.0], [10.0, 0.0, 23.0, 1.0, 23.0, 23.0, 3.0, 0.0, 23.0, 23.0, 7.0, 11.0, 19.0, 0.0, 0.0, 0.0, 23.0, 23.0, 10.0, 20.0, 3.0, 0.0, 17.0], [7.0, 0.0, 21.0, 0.0, 22.0, 18.0, 2.0, 0.0, 22.0, 21.0, 20.0, 14.0, 14.0, 0.0, 0.0, 0.0, 21.0, 21.0, 14.0, 20.0, 6.0, 0.0, 13.0], [1.0, 0.0, 21.0, 0.0, 21.0, 21.0, 0.0, 0.0, 21.0, 21.0, 4.0, 9.0, 21.0, 0.0, 0.0, 0.0, 21.0, 21.0, 8.0, 21.0, 0.0, 0.0, 18.0], [2.0, 1.0, 16.0, 0.0, 19.0, 19.0, 2.0, 0.0, 18.0, 17.0, 4.0, 11.0, 18.0, 0.0, 1.0, 0.0, 19.0, 15.0, 7.0, 18.0, 2.0, 0.0, 11.0], [14.0, 14.0, 16.0, 1.0, 19.0, 9.0, 10.0, 0.0, 3.0, 16.0, 5.0, 16.0, 10.0, 0.0, 0.0, 0.0, 19.0, 16.0, 3.0, 12.0, 4.0, 0.0, 1.0], [8.0, 12.0, 13.0, 5.0, 7.0, 7.0, 6.0, 1.0, 14.0, 13.0, 6.0, 8.0, 14.0, 4.0, 2.0, 0.0, 15.0, 13.0, 7.0, 13.0, 5.0, 4.0, 7.0], [0.0, 0.0, 16.0, 1.0, 16.0, 16.0, 0.0, 0.0, 16.0, 16.0, 4.0, 8.0, 16.0, 0.0, 0.0, 0.0, 16.0, 16.0, 8.0, 16.0, 0.0, 0.0, 10.0], [16.0, 15.0, 15.0, 0.0, 2.0, 9.0, 3.0, 1.0, 16.0, 15.0, 12.0, 8.0, 16.0, 0.0, 0.0, 0.0, 16.0, 15.0, 0.0, 9.0, 0.0, 0.0, 0.0], [10.0, 8.0, 7.0, 3.0, 13.0, 13.0, 4.0, 0.0, 13.0, 9.0, 11.0, 3.0, 13.0, 3.0, 5.0, 1.0, 13.0, 10.0, 4.0, 7.0, 3.0, 3.0, 12.0], [8.0, 11.0, 8.0, 6.0, 11.0, 10.0, 6.0, 0.0, 11.0, 8.0, 8.0, 3.0, 9.0, 6.0, 2.0, 0.0, 9.0, 8.0, 7.0, 8.0, 8.0, 5.0, 11.0], [13.0, 1.0, 14.0, 0.0, 13.0, 12.0, 1.0, 1.0, 14.0, 14.0, 8.0, 6.0, 6.0, 0.0, 0.0, 0.0, 13.0, 14.0, 9.0, 13.0, 1.0, 0.0, 9.0], [14.0, 12.0, 13.0, 0.0, 5.0, 7.0, 1.0, 0.0, 14.0, 13.0, 14.0, 9.0, 14.0, 0.0, 0.0, 0.0, 14.0, 13.0, 0.0, 9.0, 0.0, 0.0, 0.0], [13.0, 8.0, 13.0, 0.0, 8.0, 9.0, 1.0, 0.0, 13.0, 12.0, 12.0, 8.0, 13.0, 0.0, 1.0, 0.0, 11.0, 12.0, 2.0, 10.0, 3.0, 0.0, 2.0], [3.0, 10.0, 11.0, 0.0, 11.0, 9.0, 0.0, 0.0, 10.0, 11.0, 1.0, 6.0, 11.0, 0.0, 0.0, 0.0, 11.0, 9.0, 10.0, 11.0, 7.0, 4.0, 10.0], [5.0, 9.0, 11.0, 3.0, 5.0, 5.0, 5.0, 1.0, 11.0, 11.0, 3.0, 5.0, 11.0, 3.0, 3.0, 0.0, 10.0, 11.0, 7.0, 9.0, 3.0, 4.0, 7.0], [2.0, 9.0, 13.0, 0.0, 5.0, 5.0, 4.0, 0.0, 10.0, 12.0, 6.0, 8.0, 12.0, 0.0, 0.0, 0.0, 12.0, 12.0, 9.0, 8.0, 2.0, 1.0, 9.0], [4.0, 0.0, 11.0, 0.0, 12.0, 12.0, 0.0, 1.0, 11.0, 12.0, 3.0, 8.0, 12.0, 0.0, 0.0, 0.0, 10.0, 11.0, 4.0, 10.0, 0.0, 0.0, 7.0], [9.0, 6.0, 6.0, 6.0, 9.0, 9.0, 6.0, 0.0, 6.0, 6.0, 2.0, 3.0, 7.0, 4.0, 3.0, 0.0, 6.0, 6.0, 5.0, 9.0, 5.0, 5.0, 5.0], [3.0, 1.0, 11.0, 0.0, 11.0, 11.0, 0.0, 0.0, 11.0, 11.0, 5.0, 4.0, 11.0, 0.0, 1.0, 0.0, 10.0, 11.0, 4.0, 10.0, 1.0, 0.0, 6.0], [6.0, 0.0, 10.0, 1.0, 11.0, 11.0, 1.0, 1.0, 11.0, 10.0, 9.0, 8.0, 7.0, 0.0, 0.0, 0.0, 11.0, 10.0, 4.0, 7.0, 1.0, 0.0, 2.0]]}, "grand_total_households": 1595, "num_barangays": 165, "num_indicators": 23};
+
+const LEVEL_COLORS = {
+  'No Gap':'var(--l0)','Level 1':'var(--l1)','Level 2':'var(--l2)','Level 3':'var(--l3)','No Result':'var(--nr)'
+};
+const LEVELS_ORDER = ['No Gap','Level 1','Level 2','Level 3','No Result'];
+
+function fmt(n){ return Math.round(n).toLocaleString(); }
+
+// ---- category icons ----
+const ICONS = {
+  economic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  health:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-9.5-9C1 8 3 4 7 4c2 0 4 1.5 5 3 1-1.5 3-3 5-3 4 0 6 4 4.5 8C19 16.65 12 21 12 21z"/></svg>',
+  housing:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>',
+  education:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 4-9 4-9-4 9-4z"/><path d="M5 10v5c2 1.5 5 2 7 2s5-.5 7-2v-5"/></svg>',
+  protection:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6l8-3z"/></svg>',
+  all:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="1.6"/><circle cx="12" cy="5" r="1.6"/><circle cx="19" cy="5" r="1.6"/><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/><circle cx="5" cy="19" r="1.6"/><circle cx="12" cy="19" r="1.6"/><circle cx="19" cy="19" r="1.6"/></svg>'
+};
+const ICON_BG = {economic:'#1f6f5c', health:'#c0392b', housing:'#0d2b4e', education:'#7b4ea3', protection:'#b5790f', all:'#5c6b7a'};
+const CATEGORY_LABEL = {economic:'Economic', health:'Health & Nutrition', housing:'Housing & Basic Services', education:'Education', protection:'Protection & Safety', all:'All Indicators'};
+
+function categoryOf(name, groupsObj){
+  const n = name.trim();
+  for(const k in groupsObj){
+    if(k==='all') continue;
+    if(groupsObj[k].some(g=>g.trim()===n)) return k;
+  }
+  return 'all';
+}
+
+// ---- Section 1: indicator bars ----
+const indicatorListEl = document.getElementById('indicatorList');
+const indicators = DATA.indicators.filter(d=>d.indicator!=='SWDI Result 2025');
+let activeIndicator = null;
+
+function renderIndicators(){
+  indicatorListEl.innerHTML='';
+  indicators.forEach(ind=>{
+    const total = ind.Total || 1;
+    const cat = categoryOf(ind.indicator, groups);
+    const row = document.createElement('div');
+    row.className = 'indicator-row' + (activeIndicator===ind.indicator ? ' active':'');
+    const figureLevels = [
+      {key:'Level 1', label:'Survival', color:'var(--l1)'},
+      {key:'Level 2', label:'Subsistence', color:'var(--l2)'},
+      {key:'Level 3', label:'Self-Sufficient', color:'var(--l3)'},
+      {key:'No Result', label:'No Result', color:'var(--nr)'}
+    ];
+    row.innerHTML = `
+      <div class="ind-main">
+        <div class="iname-wrap">
+          <div class="icat" style="background:${ICON_BG[cat]}22;color:${ICON_BG[cat]}">${ICONS[cat]}</div>
+          <div class="iname">${titleCase(ind.indicator)}</div>
+        </div>
+        <div class="ibar-track">
+          ${LEVELS_ORDER.map(l=>{
+            const v = ind[l]||0;
+            const pct = (v/total*100).toFixed(2);
+            return pct>0 ? `<div class="seg" style="width:${pct}%;background:${LEVEL_COLORS[l]}" title="${l}: ${Math.round(v)} households">${pct>=8?Math.round(v):''}</div>` : '';
+          }).join('')}
+        </div>
+        <div class="ival">${ind.GapRate}%</div>
+      </div>
+      <div class="ind-figures">
+        ${figureLevels.map(f=>`<span class="fig-chip"><i style="background:${f.color}"></i>${f.label} <b>${Math.round(ind[f.key]||0)}</b></span>`).join('')}
+      </div>
+    `;
+    row.addEventListener('click', ()=>{
+      activeIndicator = (activeIndicator===ind.indicator) ? null : ind.indicator;
+      renderIndicators();
+      renderHeatmap();
+    });
+    indicatorListEl.appendChild(row);
+  });
+}
+
+function titleCase(s){
+  return s.trim().split(' ').map(w=> w.length>3 ? w.charAt(0)+w.slice(1).toLowerCase() : w).join(' ');
+}
+
+// ---- Section 2: barangay list ----
+const brgyListEl = document.getElementById('brgyList');
+const brgySearch = document.getElementById('brgySearch');
+const maxHigh = Math.max(...DATA.barangays.map(b=>b.high));
+
+function renderBrgyList(filter=''){
+  brgyListEl.innerHTML='';
+  DATA.barangays
+    .filter(b=> b.barangay.toLowerCase().includes(filter.toLowerCase()))
+    .slice(0,60)
+    .forEach((b,i)=>{
+      const pct = (b.high/maxHigh*100).toFixed(1);
+      const row = document.createElement('div');
+      row.className='brgy-row';
+      row.innerHTML = `
+        <div class="brgy-main">
+          <div class="brgy-rank">${i+1}</div>
+          <div class="brgy-name">${niceBrgy(b.barangay)}</div>
+          <div class="brgy-bar-track"><div class="brgy-bar" style="width:${pct}%"></div></div>
+          <div class="brgy-val">${fmt(b.high)}</div>
+        </div>
+        <div class="brgy-figures">
+          <span class="fig-chip"><i style="background:var(--l1)"></i>Survival <b>${fmt(b.level1||0)}</b></span>
+          <span class="fig-chip"><i style="background:var(--l2)"></i>Subsistence <b>${fmt(b.level2||0)}</b></span>
+        </div>
+      `;
+      brgyListEl.appendChild(row);
+    });
+}
+function niceBrgy(b){ return b.replace('BARANGAY','Brgy.'); }
+
+brgySearch.addEventListener('input', e=> renderBrgyList(e.target.value));
+
+// top rate per household
+const topRateEl = document.getElementById('topRateList');
+function renderTopRate(){
+  const sorted = [...DATA.barangays].filter(b=>b.assessed>=5).sort((a,b)=>b.rate_per_hh-a.rate_per_hh).slice(0,8);
+  topRateEl.innerHTML = sorted.map((b,i)=>`
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line);">
+      <span>${i+1}. ${niceBrgy(b.barangay)}</span>
+      <span style="font-family:'Space Mono',monospace;font-weight:700;color:var(--gold);">${b.rate_per_hh.toFixed(1)}&times;</span>
+    </div>
+  `).join('');
+}
+
+// ---- Section 3: heatmap ----
+const themeChipsEl = document.getElementById('themeChips');
+const heatmapEl = document.getElementById('heatmapTable');
+let chipFilter = 'all';
+
+const groups = {
+  all: DATA.matrix.indicators,
+  economic: ['EMPLOYABLE SKILLS','EMPLOYMENT','INCOME','SOCIAL SECURITY'],
+  health: ['ACCESSIBLE HEALTH SERVICES','HEALTH CONDITION','NUMBER OF MEALS ','NUTRITIONAL STATUS'],
+  housing: ['DRINKING WATER','TOILET FACILITIES','GARBAGE DISPOSAL ','ROOF','WALLS','TENURE ','LIGHTING'],
+  education: ['FUNCTIONAL LITERACY','ENROLLMENTATTENDANCE '],
+  protection: ['INVOLVEMENT ','ABILITY OF PARENTSGUARDIANS ','PARTICIPATION ','RIGHTS OF THE CHILDREN ','GENDER-BASED VIOLENCE','DISASTER RISK REDUCTION MANAGEM']
+};
+function renderChips(){
+  themeChipsEl.innerHTML = Object.keys(groups).map(k=>
+    `<div class="chip ${chipFilter===k?'on':''}" data-k="${k}">${ICONS[k]}${CATEGORY_LABEL[k]}</div>`
+  ).join('');
+  themeChipsEl.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click', ()=>{ chipFilter=c.dataset.k; renderChips(); renderHeatmap(); });
+  });
+}
+
+function maxOf(arr){ return arr.reduce((m,v)=>Math.max(m,v),0); }
+
+function colorFor(v, max){
+  if(v<=0) return '#f4f6f5';
+  const t = Math.min(1, v/Math.max(max,1));
+  // interpolate gold -> red
+  const r1=240,g1=165,b1=0, r2=200,g2=30,b2=24;
+  const r = Math.round(r1+(r2-r1)*t), g = Math.round(g1+(g2-g1)*t), b=Math.round(b1+(b2-b1)*t);
+  return `rgba(${r},${g},${b},${0.25+t*0.65})`;
+}
+
+function renderHeatmap(){
+  const allInd = DATA.matrix.indicators;
+  let colsIdx = allInd.map((_,i)=>i);
+  if(chipFilter!=='all'){
+    const set = new Set(groups[chipFilter].map(g=>g.trim()));
+    colsIdx = allInd.map((name,i)=> set.has(name.trim())? i: -1).filter(i=>i>=0);
+  }
+  if(activeIndicator){
+    const idx = allInd.indexOf(activeIndicator);
+    if(idx>=0) colsIdx = [idx];
+  }
+  const cols = colsIdx.map(i=>allInd[i]);
+  const rows = DATA.matrix.barangays;
+  const vals = DATA.matrix.values;
+  let max = 0;
+  rows.forEach((_,ri)=> colsIdx.forEach(ci=> max = Math.max(max, vals[ri][ci])));
+
+  let thead = '<tr><th class="rowhead">Barangay</th>' + cols.map(c=>`<th>${titleCase(c)}</th>`).join('') + '</tr>';
+  let body = rows.map((r,ri)=>{
+    const cells = colsIdx.map(ci=>{
+      const v = vals[ri][ci];
+      return `<td style="background:${colorFor(v,max)}" title="${r} — ${allInd[ci]}: ${Math.round(v)}">${v>0?Math.round(v):''}</td>`;
+    }).join('');
+    return `<tr><td class="rowname">${niceBrgy(r)}</td>${cells}</tr>`;
+  }).join('');
+  heatmapEl.innerHTML = thead + body;
+}
+
+// ---- profile strip ----
+function renderProfileStrip(){
+  const el = document.getElementById('profileStrip');
+  const cats = ['economic','health','housing','education','protection'];
+  el.innerHTML = cats.map(cat=>{
+    const members = indicators.filter(ind=> categoryOf(ind.indicator, groups)===cat);
+    const avg = members.length ? (members.reduce((s,m)=>s+m.GapRate,0)/members.length) : 0;
+    return `
+      <div class="profile-card">
+        <div class="picon" style="background:${ICON_BG[cat]}22;color:${ICON_BG[cat]}">${ICONS[cat]}</div>
+        <h4>${CATEGORY_LABEL[cat]}</h4>
+        <div class="pval">${avg.toFixed(1)}%</div>
+        <div class="psub">below self-sufficiency &middot; ${members.length} indicators</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---- Level 1 vs Level 2 grouped bar chart ----
+function renderL1L2Chart(){
+  const svg = document.getElementById('l1l2Chart');
+  const data = [...indicators].sort((a,b)=> ((b['Level 1']||0)+(b['Level 2']||0)) - ((a['Level 1']||0)+(a['Level 2']||0)));
+
+  const W = Math.max(760, data.length*64);
+  const H = 560;
+  const padL = 56, padR = 20, padT = 20, padB = 110;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+
+  const maxVal = Math.max(...data.map(d=> Math.max(d['Level 1']||0, d['Level 2']||0)));
+  const niceMax = Math.ceil(maxVal/100)*100 || 100;
+  const groupW = plotW/data.length;
+  const barW = Math.min(20, groupW*0.32);
+
+  let gridlines = '';
+  const steps = 5;
+  for(let i=0;i<=steps;i++){
+    const v = niceMax/steps*i;
+    const y = padT + plotH - (v/niceMax*plotH);
+    gridlines += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(13,43,78,0.08)" stroke-width="1"/>`;
+    gridlines += `<text x="${padL-10}" y="${y+4}" text-anchor="end" font-family="Space Mono, monospace" font-size="10" fill="#5c6b7a">${Math.round(v)}</text>`;
+  }
+
+  let bars = '';
+  data.forEach((d,i)=>{
+    const cx = padL + groupW*i + groupW/2;
+    const v1 = d['Level 1']||0, v2 = d['Level 2']||0;
+    const h1 = (v1/niceMax)*plotH, h2 = (v2/niceMax)*plotH;
+    const y1 = padT+plotH-h1, y2 = padT+plotH-h2;
+    const x1 = cx - barW - 3, x2 = cx + 3;
+    bars += `<rect x="${x1}" y="${y1}" width="${barW}" height="${h1}" rx="3" fill="var(--l1)"><title>${d.indicator}: Level 1 = ${Math.round(v1)}</title></rect>`;
+    bars += `<rect x="${x2}" y="${y2}" width="${barW}" height="${h2}" rx="3" fill="var(--l2)"><title>${d.indicator}: Level 2 = ${Math.round(v2)}</title></rect>`;
+    if(v1>0) bars += `<text x="${x1+barW/2}" y="${y1-5}" text-anchor="middle" font-family="Space Mono, monospace" font-size="9.5" fill="#e2483c" font-weight="700">${Math.round(v1)}</text>`;
+    if(v2>0) bars += `<text x="${x2+barW/2}" y="${y2-5}" text-anchor="middle" font-family="Space Mono, monospace" font-size="9.5" fill="#c97a1f" font-weight="700">${Math.round(v2)}</text>`;
+    const label = titleCase(d.indicator);
+    bars += `<text x="${cx}" y="${padT+plotH+16}" text-anchor="end" font-family="Spline Sans, sans-serif" font-size="10" fill="#1b2430" transform="rotate(-40 ${cx} ${padT+plotH+16})">${label}</text>`;
+  });
+
+  svg.innerHTML = `
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="#0d2b4e" stroke-width="1.5"/>
+    <line x1="${padL}" y1="${padT+plotH}" x2="${W-padR}" y2="${padT+plotH}" stroke="#0d2b4e" stroke-width="1.5"/>
+    ${gridlines}
+    ${bars}
+  `;
+}
+
+// ---- init ----
+renderIndicators();
+renderBrgyList();
+renderTopRate();
+renderChips();
+renderHeatmap();
+renderProfileStrip();
+renderL1L2Chart();
+</script>
+</body>
+</html>
